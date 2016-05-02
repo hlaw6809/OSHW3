@@ -1,6 +1,12 @@
 
-#include <pthread.h>
 
-pthread_mutext_t timerMutext = PTHREAD_MUTEX_INITIALIZER;
+typedef struct {
+	int quantum;
+	int time;
+} Timer;
 
-void startTimer(int milliseconds);
+typedef Timer * Timer_p;
+
+Timer_p new_timer(int quantum);
+
+int tick_timer(Timer_p timer);
