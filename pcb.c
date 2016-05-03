@@ -1,10 +1,13 @@
 // assignment 3
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 #include "pcb_h.h"
-#define NO_OBJECT_ERROR 1
 #define NO_ERROR 0
+#define NO_OBJECT_ERROR 1
+#define ALREADY_TERMINATED 2
 
+// constructor and deconstructor
 PCB_p PCB_construct (void) {
 	PCB_p raw_pcb = (PCB_p) malloc(sizeof(PCB));
 	return raw_pcb;
@@ -15,13 +18,33 @@ void PCB_deconstruct(PCB_p raw_pcb) {
 		free(raw_pcb);
 	}
 }
-//initialize the pcb...
+
+// pcb initiation
+// in running status, term_count change to 1 and state to running
 int PCB_init (PCB_p raw_pcb) {
-	unsigned short r = (rand() % 16);
+	time_t now = time(0);
+	srand((unsigned) rand());
+	// max pc value from 1000 to 3000
+	unsigned long r = rand() % (3000 - 1000 + 1) + 1000;
+	// assign any pc value below max pc value
+	unsigned long r2 = (rand() % r);
+	// assign terminate rounds at least 1 times
+	unsigned long r3 = (rand() % 3) + 1;
 	raw_pcb->state = ready;
-	raw_pcb->priority = r;
-	raw_pcb->pc = 0;
-	return 0;
+	raw_pcb->priority = 0;
+	raw_pcb->max_pc = r;
+	raw_pcb->pc = r2;
+	raw_pcb->creation = now;
+	raw_pcb->terminate = r3;
+	raw_pcb->term_count = 0;
+	// set up the trap pc values
+	for (int i=0;i<4;i++) {
+		raw_pcb->io1_traps[i] = rand() % r + 1;
+	} 
+	for (int j=0;j<4;j++) {
+		raw_pcb->io2_traps[j] = rand() % r + 1;
+	}
+	return NO_ERROR;
 }
 
 int PCB_set_pid (PCB_p raw_pcb, unsigned long pid) {
@@ -39,17 +62,64 @@ unsigned long PCB_get_pid (PCB_p raw_pcb) {
 	return raw_pcb -> pid;
 }
 
+int PCB_set_state (PCB_p raw_pcb, enum state_type state) {
+	if(!raw_pcb) {
+		return NO_OBJECT_ERROR;
+	}
+	raw_pcb -> state = state;
+	return NO_ERROR;
+}
+
+enum state_type PCB_get_state (PCB_p raw_pcb) {
+	if(!raw_pcb) {
+		return NO_OBJECT_ERROR;
+	}
+	return raw_pcb -> state;
+}
+
+int PCB_set_PC (PCB_p raw_pcb, unsigned long pc) {
+	if(!raw_pcb) {
+		return NO_OBJECT_ERROR;
+	}
+	raw_pcb -> pc = pc;
+	return NO_ERROR;
+}
+
+unsigned long PCB_get_PC (PCB_p raw_pcb) {
+	if(!raw_pcb) {
+		return NO_OBJECT_ERROR;
+	}
+	return raw_pcb -> state;
+}
+
+// set the PCB's state to be terminated and termination time
+int PCB_terminate (PCB_p raw_pcb) {
+	if(!raw_pcb) {
+		return NO_OBJECT_ERROR;
+	}
+	else if (raw_pcb -> state == terminated) {
+		return ALREADY_TERMINATED;
+	}
+	time_t now = time(0);
+	raw_pcb->state = terminated;
+	raw_pcb->termination = now;
+	return NO_ERROR;
+}
+
 char * PCB_toString (PCB_p raw_pcb) {
-	char *c = (char*) malloc(sizeof(char)*50);
+	char *c = (char*) malloc(sizeof(char)*100);
 	if(!raw_pcb) {
 		sprintf(c,"NO_OBJECT_ERROR");
 		return c;
 	}
 	else {
 		// print out the contents of pcb
-		sprintf(c,"PID: 0x%lu, Priority: 0x%u, state: %d, PC: 0x%ld",raw_pcb->pid,raw_pcb->priority,raw_pcb->state,raw_pcb->pc);
+		char *s;
+		s = ctime(&(raw_pcb->creation));
+		sprintf(c,"PID: 0x%lu, Priority: 0x%u, state: %d, PC: 0x%ld, Max_PC: 0x%ld, terminate: %d",raw_pcb->pid,raw_pcb->priority,raw_pcb->state,raw_pcb->pc,raw_pcb->max_pc,raw_pcb->terminate);
+		printf("Created At: %s",s);
 		return c;
 	}
 }
 
-int PCB_set_state (PCB_p raw_pcb, )
+
