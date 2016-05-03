@@ -24,11 +24,12 @@ typedef PCB * PCB_p;
 PCB_p PCB_construct (void);
 void PCB_deconstruct (PCB_p); // deallocates pcb from the heap
 
-//// initiation and print out
-// 1. set the priority to be all 0s
-// 2. set all the max pc to be same number 2345
-// 3. term_count = 0, initiate the trap1 and trap2 
-// 4. set up the creation time by current time
+/* initiation and print out
+* 1. set the priority to be all 0s
+* 2. set all the max pc to be same number 2345
+* 3. term_count = 0, initiate the trap1 and trap2 
+* 4. set up the creation time by current time
+*/
 int PCB_init (PCB_p); //sets default values for member data
 char * PCB_toString (PCB_p); // returns a string reprersenting the contents of the pcb
 
