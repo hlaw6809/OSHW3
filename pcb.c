@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include "pcb_h.h"
-#define NO_ERROR 0
+#define SUCCESS 0
 #define NO_OBJECT_ERROR 1
 #define ALREADY_TERMINATED 2
 
@@ -44,7 +44,7 @@ int PCB_init (PCB_p raw_pcb) {
 	for (int j=0;j<4;j++) {
 		raw_pcb->io2_traps[j] = rand() % r + 1;
 	}
-	return NO_ERROR;
+	return SUCCESS;
 }
 
 int PCB_set_pid (PCB_p raw_pcb, unsigned long pid) {
@@ -52,7 +52,7 @@ int PCB_set_pid (PCB_p raw_pcb, unsigned long pid) {
 		return NO_OBJECT_ERROR;
 	}
 	raw_pcb -> pid = pid;
-	return NO_ERROR;
+	return SUCCESS;
 }
 
 unsigned long PCB_get_pid (PCB_p raw_pcb) {
@@ -67,7 +67,7 @@ int PCB_set_state (PCB_p raw_pcb, enum state_type state) {
 		return NO_OBJECT_ERROR;
 	}
 	raw_pcb -> state = state;
-	return NO_ERROR;
+	return SUCCESS;
 }
 
 enum state_type PCB_get_state (PCB_p raw_pcb) {
@@ -82,7 +82,7 @@ int PCB_set_PC (PCB_p raw_pcb, unsigned long pc) {
 		return NO_OBJECT_ERROR;
 	}
 	raw_pcb -> pc = pc;
-	return NO_ERROR;
+	return SUCCESS;
 }
 
 unsigned long PCB_get_PC (PCB_p raw_pcb) {
@@ -103,7 +103,7 @@ int PCB_terminate (PCB_p raw_pcb) {
 	time_t now = time(0);
 	raw_pcb->state = terminated;
 	raw_pcb->termination = now;
-	return NO_ERROR;
+	return SUCCESS;
 }
 
 char * PCB_toString (PCB_p raw_pcb) {
