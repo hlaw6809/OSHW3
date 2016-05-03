@@ -3,7 +3,7 @@
 #define PCB_H
 #include <time.h>
 
-enum state_type {new_state, ready, running, interrupted, waiting, halted};
+enum state_type {new_state, ready, running, interrupted, waiting, terminated};
 
 typedef struct pcb {
 	unsigned long pid; // process PID #, a unique number
@@ -34,16 +34,14 @@ char * PCB_toString (PCB_p); // returns a string reprersenting the contents of t
 
 // accessors
 unsigned long PCB_get_pid (PCB_p); // returns pid of the process
-state_type PCB_get_state (PCB_p); // get the state of pcb
+enum state_type PCB_get_state (PCB_p); // get the state of pcb
 unsigned long PCB_get_PC (PCB_p); // get the pc value of pcb
 
 // mutators
 int PCB_set_pid (PCB_p, unsigned long pid);
-int PCB_set_state (PCB_p, state_type state);
+int PCB_set_state (PCB_p, enum state_type state);
 int PCB_set_PC (PCB_p, unsigned long pc);
 int PCB_terminate(PCB_p); // pcb terminated and termination set to current time
 
-// check status
-bool PCB_check_terminate (PCB_p); // check if the pcb is needed to be terminated
 
 #endif
