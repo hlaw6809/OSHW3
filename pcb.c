@@ -38,11 +38,12 @@ int PCB_init (PCB_p raw_pcb) {
 	raw_pcb->terminate = r3;
 	raw_pcb->term_count = 0;
 	// set up the trap pc values
-	for (int i=0;i<4;i++) {
+	int i;
+	for (i=0;i<4;i++) {
 		raw_pcb->io1_traps[i] = rand() % r + 1;
 	} 
-	for (int j=0;j<4;j++) {
-		raw_pcb->io2_traps[j] = rand() % r + 1;
+	for (i=0;i<4;i++) {
+		raw_pcb->io2_traps[i] = rand() % r + 1;
 	}
 	return SUCCESS;
 }
