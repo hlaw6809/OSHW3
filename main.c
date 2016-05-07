@@ -1,7 +1,10 @@
+#include <stdbool.h>
+#include "pcb.c"
+#include "FIFO.c"
+#include "timer.c"
 #include "timer.h"
 #include "pcb_h.h"
 #include "FIFO.h"
-#include <stdbool.h>
 
 typedef int IO_p;
 
@@ -28,14 +31,14 @@ int tick_IO(IO_p io) {
 //End Temp
 
 // check if current process need to be terminated..
-// bool PCB_check_terminate () {
-// 	if (runningProcess->terminate != 0 && runningProcess->term_count >= runningProcess->terminate) {
-// 		return true;
-// 	}
-// 	else {
-// 		return false;
-// 	}
-// }
+bool PCB_check_terminate () {
+	if (runningProcess->terminate != 0 && runningProcess->term_count >= runningProcess->terminate) {
+		return true;
+	}
+	else {
+		return false;
+	}
+}
 
 // trap handler passing the trap service number.
 // work very similarly to the timer ISR in terms of taking the running process
@@ -49,10 +52,9 @@ void io_trap_handler(int trapNum) {
 				break;
 		default: return;
 	}
-	PCB_set_state(currentProcess, waiting);
-	FIFOq_enqueue(queue, currentProcess);
+	PCB_set_state(runningProcess, waiting);
+	FIFOq_enqueue(queue, runningProcess);
 	runningProcess = FIFOq_dequeue(NULL);
-	return 0;
 }
 
 void initialize() {
@@ -61,7 +63,7 @@ void initialize() {
 
 
 
-int main(char * args) {
+int main(int argc,char* argv[]) {
 	timer = new_timer(300);
 	while(1) {
 		runningProcess->pc++;
