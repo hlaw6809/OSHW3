@@ -28,14 +28,14 @@ int tick_IO(IO_p io) {
 //End Temp
 
 // check if current process need to be terminated..
-bool PCB_check_terminate () {
-	if (runningProcess->terminate != 0 && runningProcess->term_count >= runningProcess->terminate) {
-		return true;
-	}
-	else {
-		return false;
-	}
-}
+// bool PCB_check_terminate () {
+// 	if (runningProcess->terminate != 0 && runningProcess->term_count >= runningProcess->terminate) {
+// 		return true;
+// 	}
+// 	else {
+// 		return false;
+// 	}
+// }
 
 // trap handler passing the trap service number.
 // work very similarly to the timer ISR in terms of taking the running process
