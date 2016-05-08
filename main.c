@@ -59,9 +59,11 @@ void io_trap_handler(int trapNum) {
 				break;
 		default: return;
 	}
+	// put running process to waiting queue
 	PCB_set_state(runningProcess, waiting);
 	FIFOq_enqueue(queue, runningProcess);
-	runningProcess = FIFOq_dequeue(NULL);
+	// wait for a certain period of time and put the pcb to ready queue again
+	// runningProcess = FIFOq_dequeue(NULL);
 }
 
 void initialize() {
@@ -118,8 +120,10 @@ int main(int argc,char* argv[]) {
 		for (index = 0; index < 4; index++) {
 			if (runningProcess->pc == runningProcess->io1_traps[index]) {
 				//Handle I/O 1 trap
+				io_trap_handler(1);
 			} else if (runningProcess->pc == runningProcess->io2_traps[index]) {
 				//Handle I/O 2 trap
+				io_trap_handler(2);
 			}
 		}
 			
