@@ -1,4 +1,5 @@
 #include <stdbool.h>
+#include <stdlib.h>
 #include "pcb.c"
 #include "FIFO.c"
 #include "timer.c"
@@ -32,11 +33,17 @@ int tick_IO(IO_p io) {
 
 // check if current process need to be terminated..
 bool PCB_check_terminate () {
-	if (runningProcess->terminate != 0 && runningProcess->term_count >= runningProcess->terminate) {
-		return true;
+	if(runningProcess -> term_count < runningProcess->terminate) {
+		return false;
+	}
+	else if(runningProcess->term_count == runningProcess -> terminate) {
+		if (runningProcess -> pc < runningProcess -> max_pc) {
+			return false;
+		}
+		else return true;
 	}
 	else {
-		return false;
+		return true;
 	}
 }
 
@@ -58,14 +65,32 @@ void io_trap_handler(int trapNum) {
 }
 
 void initialize() {
-	
+	// initiate 2 pcbs as testing
+	for (int i=0;i<2;i++) {
+		PCB_p pcb = PCB_construct();
+		PCB_init(pcb);
+		PCB_set_pid(pcb,i);
+		printf("%s\n",PCB_toString(pcb));
+		printf("%s","I/O_1 Traps Values ");
+		for (int j=0;j<4;j++) {
+			printf("%d ", pcb->io1_traps[j]);
+		}
+		printf("%s","I/O_2 Traps Values ");
+		for (int j=0;j<4;j++) {
+			printf("%d ", pcb->io2_traps[j]);
+		}
+		printf("\n-----------------\n");
+		FIFOq_enqueue(readyQueue,pcb);
+	}
+	runningProcess = FIFOq_dequeue(readyQueue);
 }
 
 
 
 int main(int argc,char* argv[]) {
+	initialize();
 	timer = new_timer(300);
-	while(1) {
+	while(runningProcess!=NULL) {
 		runningProcess->pc++;
 		if (runningProcess->pc >= runningProcess->max_pc) {
 			runningProcess->pc = 0;
@@ -73,6 +98,8 @@ int main(int argc,char* argv[]) {
 		}
 		if (PCB_check_terminate()) {
 			//handle termination
+			FIFOq_enqueue(terminationQueue,runningProcess);
+			runningProcess = FIFOq_dequeue(readyQueue);
 		}
 		
 		int index;

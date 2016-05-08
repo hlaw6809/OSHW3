@@ -108,7 +108,7 @@ int PCB_terminate (PCB_p raw_pcb) {
 }
 
 char * PCB_toString (PCB_p raw_pcb) {
-	char *c = (char*) malloc(sizeof(char)*100);
+	char *c = malloc(100);
 	if(!raw_pcb) {
 		sprintf(c,"NO_OBJECT_ERROR");
 		return c;
@@ -117,8 +117,7 @@ char * PCB_toString (PCB_p raw_pcb) {
 		// print out the contents of pcb
 		char *s;
 		s = ctime(&(raw_pcb->creation));
-		sprintf(c,"PID: 0x%lu, Priority: 0x%u, state: %d, PC: 0x%ld, Max_PC: 0x%ld, terminate: %d",raw_pcb->pid,raw_pcb->priority,raw_pcb->state,raw_pcb->pc,raw_pcb->max_pc,raw_pcb->terminate);
-		printf("Created At: %s",s);
+		sprintf(c,"PID: 0x%lu, Created At: %s, Priority: 0x%u, state: %d, PC: 0x%ld, Max_PC: 0x%ld, terminate: %d ",raw_pcb->pid,s,raw_pcb->priority,raw_pcb->state,raw_pcb->pc,raw_pcb->max_pc,raw_pcb->terminate);
 		return c;
 	}
 }
