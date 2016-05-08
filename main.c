@@ -105,7 +105,13 @@ int main(int argc,char* argv[]) {
 		if (PCB_check_terminate()) {
 			//handle termination
 			FIFOq_enqueue(terminationQueue,runningProcess);
-			runningProcess = FIFOq_dequeue(readyQueue);
+			// if readyQueue is Empty
+			if(readyQueue->size == 0) {
+				return 0;
+			}
+			else {
+				runningProcess = FIFOq_dequeue(readyQueue);
+			}
 		}
 		
 		int index;

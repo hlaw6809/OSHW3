@@ -29,7 +29,7 @@ int PCB_init (PCB_p raw_pcb) {
 	// assign any pc value below max pc value
 	unsigned long r2 = (rand() % r);
 	// assign terminate rounds at least 1 times
-	unsigned long r3 = (rand() % 3) + 1;
+	unsigned long r3 = (rand() % 2) + 1;
 	raw_pcb->state = ready;
 	raw_pcb->priority = 0;
 	raw_pcb->max_pc = r;
