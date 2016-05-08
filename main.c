@@ -54,15 +54,9 @@ bool PCB_check_terminate () {
 	if(runningProcess -> term_count < runningProcess->terminate) {
 		return false;
 	}
-	else if(runningProcess->term_count == runningProcess -> terminate) {
-		if (runningProcess -> pc < runningProcess -> max_pc) {
-			return false;
-		}
-		else return true;
-	}
-	else {
-		return true;
-	}
+	else if(runningProcess->term_count >= runningProcess -> terminate) {
+  		return true;
+  	}
 }
 
 // trap handler passing the trap service number.
