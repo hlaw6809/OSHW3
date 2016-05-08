@@ -1,13 +1,12 @@
 #include <stdbool.h>
 #include <stdlib.h>
-#include "pcb.c"
-#include "FIFO.c"
-#include "timer.c"
 #include "timer.h"
 #include "pcb_h.h"
 #include "FIFO.h"
 
 typedef int IO_p;
+
+enum schedule_type {TIMER, TERMINATION, TRAP};
 
 PCB_p runningProcess;
 Timer_p timer;
@@ -31,18 +30,31 @@ int tick_IO(IO_p io) {
 }
 //End Temp
 
+void dispatcher() {
+	runningProcess = FIFOq_dequeue(readyQueue);
+	if (runningProcess != NULL) {
+		PCB_set_state(runningProcess, running);
+	}
+}
+
+//Add currently running proccess to ready queue and call dispatcher to dispatch next proccess.
+void scheduler(enum schedule_type type) {
+	if (type == TIMER) {
+		PCB_set_state(runningProcess, ready);
+		FIFOq_enqueue(readyQueue, runningProcess);
+	} else if (type == TERMINATION) {
+		PCB_set_state(runningProcess, terminated);
+		FIFOq_enqueue(terminationQueue,runningProcess);
+	}
+	dispatcher();
+}
+
 // check if current process need to be terminated..
 bool PCB_check_terminate () {
 	if(runningProcess -> term_count < runningProcess->terminate) {
 		return false;
 	}
-	else if(runningProcess->term_count == runningProcess -> terminate) {
-		if (runningProcess -> pc < runningProcess -> max_pc) {
-			return false;
-		}
-		else return true;
-	}
-	else {
+	else if(runningProcess->term_count >= runningProcess -> terminate) {
 		return true;
 	}
 }
@@ -62,6 +74,7 @@ void io_trap_handler(int trapNum) {
 	// put running process to waiting queue
 	PCB_set_state(runningProcess, waiting);
 	FIFOq_enqueue(queue, runningProcess);
+	scheduler(TRAP);
 	// wait for a certain period of time and put the pcb to ready queue again
 	// runningProcess = FIFOq_dequeue(NULL);
 }
@@ -72,82 +85,70 @@ void initialize() {
 	terminationQueue = FIFOq_construct();
 	trap1WaitingQueue = FIFOq_construct();
 	trap2WaitingQueue = FIFOq_construct();
-
-	for (int i=0;i<2;i++) {
+	int i;
+	for (i=0;i<2;i++) {
 		PCB_p pcb = PCB_construct();
 		PCB_init(pcb);
 		PCB_set_pid(pcb,i);
 		printf("%s\n",PCB_toString(pcb));
 		printf("%s","I/O_1 Traps Values ");
-		for (int j=0;j<4;j++) {
+		int j;
+		for (j=0;j<4;j++) {
 			printf("%d ", pcb->io1_traps[j]);
 		}
 		printf("\n%s","I/O_2 Traps Values ");
-		for (int j=0;j<4;j++) {
+		for (j=0;j<4;j++) {
 			printf("%d ", pcb->io2_traps[j]);
 		}
-		printf("\n-----------------\n");
 		FIFOq_enqueue(readyQueue,pcb);
-		// FIFOq_toString(readyQueue);
+		printf("\nReady Queue: %s\n",FIFOq_toString(readyQueue));
+		printf("-----------------\n");
 	}
 	runningProcess = FIFOq_dequeue(readyQueue);
 }
 
 
-void dispatcher() {
-	runningProcess = FIFOq_dequeue(readyQueue);
-	runningProcess->state = running;
-}
-
-//Add currently running proccess to ready queue and call dispatcher to dispatch next proccess.
-void scheduler() {
-	runningProcess->state->ready;
-	FIFOq_enqueue(readyQueue,pcb);
-	dispatcher();
-}
-
-
-
 int main(int argc, char* argv[]) {
 	initialize();
 	timer = new_timer(300);
+	int x = 10;
 	while(runningProcess!=NULL) {
-		runningProcess->pc++;
+		(runningProcess->pc)++;
 		if (runningProcess->pc >= runningProcess->max_pc) {
 			runningProcess->pc = 0;
-			runningProcess->term_count++;
-		}
-		if (PCB_check_terminate()) {
-			//handle termination
-			FIFOq_enqueue(terminationQueue,runningProcess);
-			// if readyQueue is Empty
-			if(readyQueue->size == 0) {
-				return 0;
-			}
-			else {
-				dispatcher();
+			(runningProcess->term_count)++;
+			if (PCB_check_terminate()) {
+				// if readyQueue is Empty
+				scheduler(TERMINATION);
+				if(FIFOq_is_empty(readyQueue) && runningProcess == NULL) {
+					break;
+				}
 			}
 		}
-		
 		int index;
 		for (index = 0; index < 4; index++) {
 			if (runningProcess->pc == runningProcess->io1_traps[index]) {
 				//Handle I/O 1 trap
-				io_trap_handler(1);
+				//io_trap_handler(1);
 			} else if (runningProcess->pc == runningProcess->io2_traps[index]) {
 				//Handle I/O 2 trap
-				io_trap_handler(2);
+				//io_trap_handler(2);
 			}
 		}
 			
 		if (tick_timer(timer) == 1) {
-			scheduler();
+			scheduler(TIMER);
 		} else if (tick_IO(io1) == 1) {
 			//Handle I/O 1 completion interrupt
 		} else if (tick_IO(io2) == 1) {
 			//Handle I/O 2 completion interrupt
 		}
 	}
-	
+	PCB_deconstruct(runningProcess);
+	FIFOq_destruct(readyQueue);
+	FIFOq_destruct(trap1WaitingQueue);
+	FIFOq_destruct(trap2WaitingQueue);
+	FIFOq_destruct(terminationQueue);
+	printf("ENDING PROGRAM \n");
 	return 0;
 }
