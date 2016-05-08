@@ -16,8 +16,8 @@ FIFOq_p trap2WaitingQueue;
 FIFOq_p terminationQueue;
 
 //Temp
-IO_p io1 = 100;
-IO_p io2 = 150;
+IO_p io1;
+IO_p io2;
 
 int tick_IO(IO_p io) {
 	io--;
@@ -61,7 +61,7 @@ bool PCB_check_terminate () {
 
 // trap handler passing the trap service number.
 // work very similarly to the timer ISR in terms of taking the running process
-// out of the state and put it into the waiting queue 
+// out of the state and put it into the waiting queue
 void io_trap_handler(int trapNum) {
 	FIFOq_p queue;
 	switch(trapNum) {
@@ -80,6 +80,12 @@ void io_trap_handler(int trapNum) {
 }
 
 void initialize() {
+	srand(time(0));
+
+	// Randomize the IO timer values
+	io1 = rand() % 100 + 300;
+	io2 = rand() % 100 + 300;
+
 	// initiate 2 pcbs as testing
 	readyQueue = FIFOq_construct();
 	terminationQueue = FIFOq_construct();
@@ -135,13 +141,17 @@ int main(int argc, char* argv[]) {
 				//io_trap_handler(2);
 			}
 		}
-			
+
 		if (tick_timer(timer) == 1) {
 			scheduler(TIMER);
 		} else if (tick_IO(io1) == 1) {
 			//Handle I/O 1 completion interrupt
+
+			io1 = rand() % 100 + 300; // Reset random IO timer value
 		} else if (tick_IO(io2) == 1) {
 			//Handle I/O 2 completion interrupt
+
+			io2 = rand() % 100 + 300; // Reset random IO timer value
 		}
 	}
 	PCB_deconstruct(runningProcess);
