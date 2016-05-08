@@ -145,12 +145,10 @@ int main(int argc, char* argv[]) {
 		if (tick_timer(timer) == 1) {
 			scheduler(TIMER);
 		} else if (tick_IO(io1) == 1) {
-			//Handle I/O 1 completion interrupt
-
+			scheduler(TRAP);
 			io1 = rand() % 100 + 300; // Reset random IO timer value
 		} else if (tick_IO(io2) == 1) {
-			//Handle I/O 2 completion interrupt
-
+			scheduler(TRAP);
 			io2 = rand() % 100 + 300; // Reset random IO timer value
 		}
 	}
