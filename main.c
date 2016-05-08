@@ -66,6 +66,11 @@ void io_trap_handler(int trapNum) {
 
 void initialize() {
 	// initiate 2 pcbs as testing
+	readyQueue = FIFOq_construct();
+	terminationQueue = FIFOq_construct();
+	trap1WaitingQueue = FIFOq_construct();
+	trap2WaitingQueue = FIFOq_construct();
+
 	for (int i=0;i<2;i++) {
 		PCB_p pcb = PCB_construct();
 		PCB_init(pcb);
@@ -75,12 +80,13 @@ void initialize() {
 		for (int j=0;j<4;j++) {
 			printf("%d ", pcb->io1_traps[j]);
 		}
-		printf("%s","I/O_2 Traps Values ");
+		printf("\n%s","I/O_2 Traps Values ");
 		for (int j=0;j<4;j++) {
 			printf("%d ", pcb->io2_traps[j]);
 		}
 		printf("\n-----------------\n");
 		FIFOq_enqueue(readyQueue,pcb);
+		// FIFOq_toString(readyQueue);
 	}
 	runningProcess = FIFOq_dequeue(readyQueue);
 }
