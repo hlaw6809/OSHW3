@@ -94,8 +94,21 @@ void initialize() {
 }
 
 
+void dispatcher() {
+	runningProcess = FIFOq_dequeue(readyQueue);
+	runningProcess->state = running;
+}
 
-int main(int argc,char* argv[]) {
+//Add currently running proccess to ready queue and call dispatcher to dispatch next proccess.
+void scheduler() {
+	runningProcess->state->ready;
+	FIFOq_enqueue(readyQueue,pcb);
+	dispatcher();
+}
+
+
+
+int main(int argc, char* argv[]) {
 	initialize();
 	timer = new_timer(300);
 	while(runningProcess!=NULL) {
@@ -112,7 +125,7 @@ int main(int argc,char* argv[]) {
 				return 0;
 			}
 			else {
-				runningProcess = FIFOq_dequeue(readyQueue);
+				dispatcher();
 			}
 		}
 		
@@ -128,7 +141,7 @@ int main(int argc,char* argv[]) {
 		}
 			
 		if (tick_timer(timer) == 1) {
-			//Handle Timer Interrupt
+			scheduler();
 		} else if (tick_IO(io1) == 1) {
 			//Handle I/O 1 completion interrupt
 		} else if (tick_IO(io2) == 1) {
