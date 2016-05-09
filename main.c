@@ -35,7 +35,7 @@ int tick_IO(IO_p io) {
 
 void dispatcher() {
 	runningProcess = FIFOq_dequeue(readyQueue);
-	printf("Now Running: %s\n",PCB_toString(runningProcess));
+	printf("Now Running(from dispatcher): %s\n",PCB_toString(runningProcess));
 	if (runningProcess != NULL) {
 		PCB_set_state(runningProcess, running);
 	}
