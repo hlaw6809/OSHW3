@@ -35,8 +35,8 @@ int tick_IO(IO_p io) {
 
 void dispatcher() {
 	runningProcess = FIFOq_dequeue(readyQueue);
-	printf("Now Running(from dispatcher): %s\n",PCB_toString(runningProcess));
 	if (runningProcess != NULL) {
+		printf("Now Running(from dispatcher): %s\n",PCB_toString(runningProcess));
 		PCB_set_state(runningProcess, running);
 	}
 }
@@ -90,6 +90,7 @@ void io_trap_handler(int trapNum) {
 	scheduler(TRAP);
 	// wait for a certain period of time and put the pcb to ready queue again
 	runningProcess = FIFOq_dequeue(queue);
+	printf("Now Running(from io_trap_handler): %s\n",PCB_toString(runningProcess));
 }
 
 void initialize() {
@@ -143,6 +144,7 @@ int main(int argc, char* argv[]) {
 				if(FIFOq_is_empty(readyQueue) && runningProcess == NULL) {
 					break;
 				}
+				else runningProcess = FIFOq_dequeue(readyQueue);
 			}
 		}
 		int index;
