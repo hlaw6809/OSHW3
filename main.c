@@ -18,7 +18,6 @@ FIFOq_p trap1WaitingQueue;
 FIFOq_p trap2WaitingQueue;
 FIFOq_p terminationQueue;
 
-//Temp
 IO_p io1;
 IO_p io2;
 
@@ -31,7 +30,6 @@ int tick_IO(IO_p io) {
 	}
 	return interrupted;
 }
-//End Temp
 
 void dispatcher() {
 	runningProcess = FIFOq_dequeue(readyQueue);
@@ -152,22 +150,17 @@ int main(int argc, char* argv[]) {
 			int index;
 			for (index = 0; index < 4; index++) {
 				if (runningProcess->pc == runningProcess->io1_traps[index]) {
-					printf("TRAP1\n");
 					//Handle I/O 1 trap
 					io_trap_handler(1);
-					printf("TRAP1 done\n");
 				} else if (runningProcess->pc == runningProcess->io2_traps[index]) {
-					printf("TRAP2\n");
 					//Handle I/O 2 trap
 					io_trap_handler(2);
 				}
 			}
 		}
 		if (tick_timer(timer) == 1) {
-			printf("Timer\n");
 			scheduler(TIMER);
 		} else if (tick_IO(io1) == 1) {
-			printf("IO1\n");
 			if (FIFOq_is_empty(trap1WaitingQueue) == 0) {
 				PCB_p pcb = FIFOq_dequeue(trap1WaitingQueue);
 				PCB_set_state(pcb, ready);
@@ -176,7 +169,6 @@ int main(int argc, char* argv[]) {
 			
 			io1 = rand() % 100 + 300; // Reset random IO timer value
 		} else if (tick_IO(io2) == 1) {
-			printf("IO2\n");
 			if (FIFOq_is_empty(trap2WaitingQueue) == 0) {
 				PCB_p pcb = FIFOq_dequeue(trap2WaitingQueue);
 				PCB_set_state(pcb, ready);
