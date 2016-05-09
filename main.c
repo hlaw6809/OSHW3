@@ -54,7 +54,8 @@ bool PCB_check_terminate () {
 	if(runningProcess -> term_count < runningProcess->terminate) {
 		return false;
 	}
-	else if(runningProcess->term_count >= runningProcess -> terminate) {
+	// runningProcess->term_count >= runningProcess -> terminate
+	else{
   		return true;
   	}
 }
