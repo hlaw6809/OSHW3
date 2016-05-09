@@ -103,7 +103,7 @@ void initialize() {
 	trap1WaitingQueue = FIFOq_construct();
 	trap2WaitingQueue = FIFOq_construct();
 	int i;
-	for (i=0;i<2;i++) {
+	for (i=0;i<20;i++) {
 		PCB_p pcb = PCB_construct();
 		PCB_init(pcb);
 		PCB_set_pid(pcb,i);
