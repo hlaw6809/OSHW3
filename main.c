@@ -3,6 +3,9 @@
 #include "timer.h"
 #include "pcb_h.h"
 #include "FIFO.h"
+#include "timer.c"
+#include "pcb.c"
+#include "FIFO.c"
 
 typedef int IO_p;
 
@@ -32,6 +35,7 @@ int tick_IO(IO_p io) {
 
 void dispatcher() {
 	runningProcess = FIFOq_dequeue(readyQueue);
+	printf("Now Running: %s\n",PCB_toString(runningProcess));
 	if (runningProcess != NULL) {
 		PCB_set_state(runningProcess, running);
 	}
@@ -41,17 +45,24 @@ void dispatcher() {
 void scheduler(enum schedule_type type) {
 	if (type == TIMER) {
 		PCB_set_state(runningProcess, ready);
+		printf("Returned to ReadyQueue: %s\n",PCB_toString(runningProcess));
 		FIFOq_enqueue(readyQueue, runningProcess);
 	} else if (type == TERMINATION) {
 		PCB_set_state(runningProcess, terminated);
-		FIFOq_enqueue(terminationQueue,runningProcess);
+		// set up the termination time of runningProcess
+		time_t now = time(0);
+		runningProcess->termination = now;
+		char *s;
+		s = ctime(&(runningProcess->termination));
+		printf("Terminated at %s: %s\n",s,PCB_toString(runningProcess));
+		FIFOq_enqueue(terminationQueue, runningProcess);
 	}
 	dispatcher();
 }
 
 // check if current process need to be terminated..
 bool PCB_check_terminate () {
-	if(runningProcess -> term_count < runningProcess->terminate) {
+	if(runningProcess->term_count < runningProcess->terminate) {
 		return false;
 	}
 	// runningProcess->term_count >= runningProcess -> terminate
@@ -75,6 +86,7 @@ void io_trap_handler(int trapNum) {
 	// put running process to waiting queue
 	PCB_set_state(runningProcess, waiting);
 	FIFOq_enqueue(queue, runningProcess);
+	printf("Enqueuing Trap %d Waiting Queue: %s\n",trapNum,PCB_toString(runningProcess));
 	scheduler(TRAP);
 	// wait for a certain period of time and put the pcb to ready queue again
 	runningProcess = FIFOq_dequeue(queue);
@@ -112,6 +124,7 @@ void initialize() {
 		printf("-----------------\n");
 	}
 	runningProcess = FIFOq_dequeue(readyQueue);
+	printf("Now Running: %s\n",PCB_toString(runningProcess));
 }
 
 
