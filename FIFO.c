@@ -29,7 +29,7 @@
      PCB_p pcb;
 
     if(FIFOq_is_empty(queue)) {
-        printf("empty list. \n");
+		return NULL;
     } else {
         pcb = head->pcb;
  	      //moves head pointer to the next node
@@ -40,7 +40,6 @@
  	    //DONT FORGET TO FREE THE MEMORY
  	    free(head);
     }
-
     return pcb;
 
  }

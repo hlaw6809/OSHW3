@@ -11,6 +11,8 @@ typedef int * IO_p;
 
 enum schedule_type {TIMER, TERMINATION, TRAP};
 
+enum schedule_type {TIMER, TERMINATION, TRAP};
+
 PCB_p runningProcess;
 Timer_p timer;
 FIFOq_p readyQueue;
@@ -18,7 +20,6 @@ FIFOq_p trap1WaitingQueue;
 FIFOq_p trap2WaitingQueue;
 FIFOq_p terminationQueue;
 
-//Temp
 IO_p io1;
 IO_p io2;
 
@@ -31,7 +32,35 @@ int tick_IO(IO_p io) {
 	}
 	return interrupted;
 }
-//End Temp
+
+void dispatcher() {
+	runningProcess = FIFOq_dequeue(readyQueue);
+	printf("Now Running: %s\n",PCB_toString(runningProcess));
+	if (runningProcess != NULL) {
+		PCB_set_state(runningProcess, running);
+	}
+}
+
+//Add currently running proccess to ready queue and call dispatcher to dispatch next proccess.
+void scheduler(enum schedule_type type) {
+	if (type == TIMER) {
+		if (runningProcess != NULL) {
+			PCB_set_state(runningProcess, ready);
+			printf("Returned to ReadyQueue: %s\n",PCB_toString(runningProcess));
+			FIFOq_enqueue(readyQueue, runningProcess);
+		}
+	} else if (type == TERMINATION) {
+		PCB_set_state(runningProcess, terminated);
+		// set up the termination time of runningProcess
+		time_t now = time(0);
+		runningProcess->termination = now;
+		char *s;
+		s = ctime(&(runningProcess->termination));
+		printf("Terminated at %s: %s\n",s,PCB_toString(runningProcess));
+		FIFOq_enqueue(terminationQueue, runningProcess);
+	}
+	dispatcher();
+}
 
 void dispatcher() {
 	if (FIFOq_is_empty(readyQueue) == 0) {
@@ -107,7 +136,7 @@ void io_trap_handler(int trapNum) {
 }
 
 void initialize() {
-	srand(time(0));
+	srand(time(NULL));
 	io1 = malloc(sizeof(int));
 	io2 = malloc(sizeof(int));
 	// Randomize the IO timer values
