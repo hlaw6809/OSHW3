@@ -17,6 +17,7 @@
  	} else {
  		queue->tail->next = newNode;
  	}
+	
  	queue->tail = newNode;
 	queue->size++;
  }
